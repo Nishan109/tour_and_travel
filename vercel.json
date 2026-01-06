@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "api/asgi.py": {
+      "runtime": "python3.12"
+    }
+  },
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/(favicon\\.ico)", "dest": "/$1" },
+    { "src": "/(.*)", "dest": "api/asgi.py" }
+  ]
+}

@@ -1,33 +1,87 @@
 {% extends 'index.html' %}
 {% block content %}
-<div class="v">
-  <div class="container"><br><br>
-    <h1 class="ht"> CREATE NEW ACCOUNT</h1><br><br>
-    <div class="row">
-      <div class="col-md-3"></div>
-      <div class="form col-md-6 p-3 shadow-lg bg-light">
-        <form class="form-group" method="POST">
-          {% csrf_token %}
-          {{form.as_p}}
-        <button class="btn btn-primary"> REGISTER</button>
-        </form>
+
+<div class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="modern-card auth-card slide-up">
+          <div class="text-center mb-4">
+            <div class="auth-icon mb-3">
+              <i class="fas fa-user-plus fa-3x text-primary"></i>
+            </div>
+            <h1 class="h3 mb-1">Create your TravelTrip account</h1>
+            <p class="text-muted mb-0">Sign up to book flights, hotels, and packages</p>
+          </div>
+
+          <form method="POST" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+              <div class="mb-3">
+                <label class="form-label-modern">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% if field.errors %}
+                  <div class="text-danger small mt-1">{{ field.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+
+            <button class="btn btn-primary-modern w-100" type="submit">
+              <i class="fas fa-user-plus me-1"></i>Create Account
+            </button>
+          </form>
+
+          <div class="text-center mt-4">
+            <span class="text-muted">Already have an account?</span>
+            <a href="{% url 'login_url' %}" class="ms-1">Login</a>
+          </div>
+        </div>
       </div>
-    <div class="col-md-3"></div>
     </div>
   </div>
-  <br><br><br>
 </div>
 
-<style >
-  .btn{
-    margin-left:200px;
+<style>
+  .auth-page {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    background: radial-gradient(circle at top left, #eff6ff, #f9fafb);
+    padding: 3rem 0;
   }
-  .ht{
-    font-family:'Viga';
-    margin-left:30%;
+
+  .auth-card {
+    max-width: 520px;
+    margin: 0 auto;
   }
-  .v{
-    background:linear-gradient(to right,#ffd3b6,#a8e6cf,#dcedc1);
+
+  .auth-icon i {
+    color: #2563eb;
+  }
+
+  .auth-form input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+  }
+
+  .auth-form input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  .auth-card a {
+    text-decoration: none;
+  }
+
+  .auth-card a:hover {
+    text-decoration: underline;
   }
 </style>
 

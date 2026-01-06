@@ -3,85 +3,563 @@
 {% load static %}
   <head>
     <meta charset="utf-8">
-    <title></title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=Spicy+Rice&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Fredoka+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static "css/styleone.css" %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Book Hotel - TravelTrip</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/modern-style.css' %}">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9fafb;
+        }
+        
+        .booking-hero {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .booking-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .booking-hero p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .rooms-search-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .rooms-search-form h2 {
+            color: #1f2937;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .rooms-search-form h2 i {
+            color: #10b981;
+        }
+        
+        .form-group-modern {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label-modern {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-size: 1rem;
+        }
+        
+        .form-control-modern {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control-modern:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .btn-search-modern {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn-search-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+            color: white;
+        }
+        
+        .hotel-card-modern {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .hotel-card-modern:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .hotel-image-container {
+            overflow: hidden;
+            padding: 0;
+        }
+        
+        .hotel-image-container img {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+        
+        .hotel-card-modern:hover .hotel-image-container img {
+            transform: scale(1.1);
+        }
+        
+        .hotel-content {
+            padding: 2rem;
+        }
+        
+        .hotel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+        
+        .hotel-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hotel-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hotel-info {
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .hotel-price-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e5e7eb;
+            margin-top: 1.5rem;
+        }
+        
+        .hotel-price-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .hotel-price-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #10b981;
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
+        }
+        
+        .hotel-price-currency {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        
+        .availability-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .book-button-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(16, 185, 129, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            border-radius: 1rem;
+        }
+        
+        .hotel-card-modern:hover .book-button-overlay {
+            opacity: 1;
+        }
+        
+        .book-button-text {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .unavailable-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(239, 68, 68, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+        }
+        
+        .unavailable-text {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .go-back-button {
+            background: white;
+            color: #10b981;
+            padding: 0.875rem 2rem;
+            border: 2px solid #10b981;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+        }
+        
+        .go-back-button:hover {
+            background: #10b981;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+            text-decoration: none;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .booking-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hotel-price-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
   </head>
   <body>
-    <br><br><br>
-    <div class="fh">
-    <div class="container form">
-      <h1 class="tr"></h1>
-      <div class="row">
-        <div class="col-md-3"></div>
-        <div class="col-md-6 shadow-lg p-3 mb-5 bg-white rounded">
-      <form class="form-group" action="" method="POST">
-        {% csrf_token %}
-        {{form.as_p}}
-        <button class="btn btn-primary">SEARCH</button>
-      </form></div>
-      <div class="col-md-3"></div>
-    </div>
-    </div>
-    {% block content %}
-    {% for i in hotel %}
-    <div class="hotel">
-      <div class="container">
-        {% ifequal availability "available" %}
-        <a class="ht" href='/userhotel/{{ i.hotel_name }}/{{ date }}/{{ roomreq }}'>
-        <div class="row shadow-lg p-3 mt-5 mb-5 rounded">
-          <div class="col-md-4 ">
-            <img class="h-img shadow-lg" src="/media/{{ i.image1 }}" alt="image">
-          </div>
-          <div class="col-md-8">
-            <p class="roomrem">Available Rooms: {{ roomrem }}</p>
-            <p class="h-name">{{i.hotel_name}}</p>
-            <p class="h-add">{{i.hotel_address}}.<br>{{ i.distfromap }} KM from nearest airport.</p>
-            <p class="h-price">{{ price }}*</p>
-            <p class="h-pricex">/night</p>
-            <p class="h-am">{{ i.amenities}}</p>
-            <div class="h-rate">
-            {% with ''|center:i.hotel_rating as range %}
-              {% for _ in range %}
-                  ★
-              {% endfor %}
-            {% endwith %}
-            </div>
-          </div>
+{% block content %}
+    <!-- Hero Section -->
+    <section class="booking-hero">
+        <div class="container">
+            <h1><i class="fas fa-bed me-3"></i>Book Your Hotel</h1>
+            <p>Select the number of rooms and complete your booking</p>
         </div>
-        <h1 class="fff">BOOK</h1>
-        </a>
-        {% endifequal %}
-        {% ifequal availability "unavailable" %}
-        <h1 class="fffu">BOOKED</h1>
-        <div class="row shadow-lg p-3 mt-5 mb-5 rounded">
-          <div class="col-md-4 ">
-            <img class="h-img shadow-lg" src="/media/{{ i.image1 }}" alt="image">
-          </div>
-          <div class="col-md-8">
-            <p class="roomremu">Available Rooms: {{ roomrem }}</p>
-            <p class="h-name">{{i.hotel_name}}</p>
-            <p class="h-add">{{i.hotel_address}}.<br>{{ i.distfromap }} KM from nearest airport.</p>
-            <p class="h-price">{{ price }}*</p>
-            <p class="h-pricex">/night</p>
-            <p class="h-am">{{ i.amenities}}</p>
-            <div class="h-rate">
-            {% with ''|center:i.hotel_rating as range %}
-              {% for _ in range %}
-                  ★
-              {% endfor %}
-            {% endwith %}
-            </div>
-          </div>
-        </div>
-        {% endifequal %}
-      </div>
-      </div>
+    </section>
 
-    {% endfor %}
-<br>
-<a href="{{request.META.HTTP_REFERER}}" class="btn btn-primary">Go back</a>
+    <div class="container">
+        <!-- Rooms Search Form -->
+        <div class="rooms-search-form fade-in">
+            <h2>
+                <i class="fas fa-door-open"></i>
+                Select Number of Rooms
+            </h2>
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-bed me-2 text-success"></i>Number of Rooms
+                            </label>
+                            {{ form.rooms.as_widget }}
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn-search-modern">
+                            <i class="fas fa-search"></i>
+                            SEARCH
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Hotel Cards -->
+        {% for i in hotel %}
+            {% if availability == "available" %}
+            <div class="fade-in" style="animation-delay: {{ forloop.counter0|add:'0.1' }}s;">
+                <a href='/userhotel/{{ i.hotel_name }}/{{ date }}/{{ roomreq }}' class="hotel-card-modern">
+                    <div class="book-button-overlay">
+                        <div class="book-button-text">
+                            <i class="fas fa-check-circle"></i>
+                            CLICK TO BOOK
+                        </div>
+                    </div>
+                    
+                    <div class="row g-0">
+                        <div class="col-md-5 hotel-image-container">
+                            {% if i.image1 %}
+                                <img src="/media/{{ i.image1 }}" alt="{{ i.hotel_name }}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="display: none; min-height: 300px; width: 100%; height: 100%;">
+                                    <i class="fas fa-bed fa-3x text-muted"></i>
+                                </div>
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="min-height: 300px; width: 100%; height: 100%;">
+                                    <i class="fas fa-bed fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-7">
+                            <div class="hotel-content">
+                                <div class="availability-badge">
+                                    <i class="fas fa-door-open"></i>
+                                    Available Rooms: {{ roomrem }}
+                                </div>
+                                
+                                <h3 class="hotel-name">{{ i.hotel_name }}</h3>
+                                
+                                <div class="hotel-rating">
+                                    {% with ''|center:i.hotel_rating as range %}
+                                        {% for _ in range %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% endfor %}
+                                    {% endwith %}
+                                    <span class="text-muted ms-2">({{ i.hotel_rating }}/5)</span>
+                                </div>
+                                
+                                <div class="hotel-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ i.hotel_address }}
+                                </div>
+                                
+                                <div class="hotel-info">
+                                    <i class="fas fa-plane"></i>
+                                    {{ i.distfromap }} KM from nearest airport
+                                </div>
+                                
+                                <div class="hotel-info">
+                                    <i class="fas fa-wifi"></i>
+                                    {{ i.amenities|truncatechars:60 }}
+                                </div>
+                                
+                                <div class="hotel-price-section">
+                                    <div class="hotel-price-label">Total Price</div>
+                                    <div class="hotel-price-value">
+                                        <span class="hotel-price-currency">₹</span>
+                                        {{ price }}
+                                        <small class="text-muted ms-2" style="font-size: 0.875rem;">/night</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if availability == "unavailable" %}
+            <div class="fade-in" style="animation-delay: {{ forloop.counter0|add:'0.1' }}s;">
+                <div class="hotel-card-modern" style="cursor: not-allowed;">
+                    <div class="unavailable-overlay">
+                        <div class="unavailable-text">
+                            <i class="fas fa-times-circle"></i>
+                            FULLY BOOKED
+                        </div>
+                    </div>
+                    
+                    <div class="row g-0">
+                        <div class="col-md-5 hotel-image-container">
+                            {% if i.image1 %}
+                                <img src="/media/{{ i.image1 }}" alt="{{ i.hotel_name }}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="display: none; min-height: 300px; width: 100%; height: 100%;">
+                                    <i class="fas fa-bed fa-3x text-muted"></i>
+                                </div>
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="min-height: 300px; width: 100%; height: 100%;">
+                                    <i class="fas fa-bed fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-7">
+                            <div class="hotel-content">
+                                <div class="availability-badge" style="background: rgba(239, 68, 68, 0.1); color: #dc2626;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    Available Rooms: {{ roomrem }}
+                                </div>
+                                
+                                <h3 class="hotel-name">{{ i.hotel_name }}</h3>
+                                
+                                <div class="hotel-rating">
+                                    {% with ''|center:i.hotel_rating as range %}
+                                        {% for _ in range %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% endfor %}
+                                    {% endwith %}
+                                    <span class="text-muted ms-2">({{ i.hotel_rating }}/5)</span>
+                                </div>
+                                
+                                <div class="hotel-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ i.hotel_address }}
+                                </div>
+                                
+                                <div class="hotel-info">
+                                    <i class="fas fa-plane"></i>
+                                    {{ i.distfromap }} KM from nearest airport
+                                </div>
+                                
+                                <div class="hotel-info">
+                                    <i class="fas fa-wifi"></i>
+                                    {{ i.amenities|truncatechars:60 }}
+                                </div>
+                                
+                                <div class="hotel-price-section">
+                                    <div class="hotel-price-label">Total Price</div>
+                                    <div class="hotel-price-value">
+                                        <span class="hotel-price-currency">₹</span>
+                                        {{ price }}
+                                        <small class="text-muted ms-2" style="font-size: 0.875rem;">/night</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        
+        <!-- Go Back Button -->
+        <div class="text-center">
+            <a href="{{request.META.HTTP_REFERER}}" class="go-back-button">
+                <i class="fas fa-arrow-left"></i>
+                Go Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Add modern styling to form inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[name="rooms"]');
+            inputs.forEach(input => {
+                input.classList.add('form-control-modern');
+                input.setAttribute('type', 'number');
+                input.setAttribute('min', '1');
+                input.setAttribute('max', '10');
+            });
+            
+            // Animate cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            document.querySelectorAll('.fade-in').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.6s ease-out';
+                observer.observe(el);
+            });
+        });
+    </script>
 {% endblock %}
+</body>
+</html>
 <!-- <a href="/userhotel/{{ i.hotel_name }}/{{ date }}">Confirm</a> -->

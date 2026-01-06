@@ -20,12 +20,16 @@ TEMPLATE_DIR = os.path.join(BASE_DIR,'templates')
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'axx97&6%uwp!(*fg$q8s*%5honv!4i7#ce8o4#+m)e$9h)!#x0'
+# Use environment variable in production; fall back to local dev key
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'axx97&6%uwp!(*fg$q8s*%5honv!4i7#ce8o4#+m)e$9h)!#x0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Controlled via env var DJANGO_DEBUG (True/False)
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes', 'on')
 
-ALLOWED_HOSTS = []
+# Allow local and Vercel hosts; can be extended via ALLOWED_HOSTS env (comma-separated)
+_extra_hosts = [h for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app'] + _extra_hosts
 
 
 # Application definition
@@ -81,6 +85,16 @@ DATABASES = {
     }
 }
 
+# If DATABASE_URL is provided, use it (recommended for Vercel)
+_database_url = os.getenv('DATABASE_URL')
+if _database_url:
+    try:
+        import dj_database_url
+        DATABASES['default'] = dj_database_url.parse(_database_url, conn_max_age=600)
+    except Exception:
+        # Fallback silently to sqlite if parsing fails
+        pass
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -123,6 +137,17 @@ STATIC_ROOT=os.path.join(BASE_DIR,'root')
 STATICFILES_DIRS=(
 os.path.join(BASE_DIR,'static'),
 )
+
+# Trust Vercel origins for CSRF in production
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+]
+
+LOGOUT_REDIRECT_URL = '/'
+LOGOUT_URL = '/logout/'
+
+# Allow GET requests for logout (for compatibility)
+LOGOUT_ON_GET = True
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')

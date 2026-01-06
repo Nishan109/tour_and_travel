@@ -1,62 +1,421 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 {% load static %}
-  <head>
+<head>
     <meta charset="utf-8">
-    <title></title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=Spicy+Rice&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Fredoka+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static "css/styleone.css" %}">
-  </head>
-  <body>
-{% block content %}
-<div class="hf">
-<div class="container">
-  <br><br><br><h1 class="t">Hotels</h1>
-  <div class="row down">
-    <div class="col-md-3"></div>
-    <div class="col-md-6 shadow-lg p-3 mb-5 bg-white rounded">
-  <form class="form-group" action="" method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button class="btn btn-primary">SEARCH</button>
-  </form></div>
-  <div class="col-md-3"></div>
-  </div>
-</div>
-</div>
-
-{% for i in Hotels %}
-<div class="hotel">
-  <div class="container">
-    <a class="ht" href='/bookhotel/{{ i.hotel_name }}/{{ date }}'>
-    <div class="row shadow-lg p-3 mt-5 mb-5 rounded">
-      <div class="col-md-4 ">
-        <img class="h-img shadow-lg" src="/media/{{ i.image1 }}" alt="image">
-      </div>
-      <div class="col-md-8">
-        <p class="h-name">{{i.hotel_name}}</p>
-        <p class="h-add">{{i.hotel_address}}.<br>{{ i.distfromap }} KM from nearest airport.</p>
-        <p class="h-price">{{ i.hotel_price }}*</p>
-        <p class="h-pricex">/night</p>
-        <p class="h-am">{{ i.amenities}}</p>
-        <div class="h-rate">
-        {% with ''|center:i.hotel_rating as range %}
-          {% for _ in range %}
-              ★
-          {% endfor %}
-        {% endwith %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Search Hotels - TravelTrip</title>
+    
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Modern Styles -->
+    <link rel="stylesheet" href="{% static 'css/modern-style.css' %}">
+    <style>
+        /* Ensure images display properly */
+        .hotel-image-container {
+            overflow: hidden;
+            padding: 0;
+            background: #f3f4f6;
+        }
+        
+        .hotel-image-container img {
+            width: 100%;
+            height: 100%;
+            min-height: 250px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .hotel-image-container:hover img {
+            transform: scale(1.05);
+        }
+        
+        .modern-card .row {
+            align-items: stretch;
+        }
+        
+        .modern-card .col-md-4 {
+            display: flex;
+            align-items: stretch;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Navigation -->
+    <nav class="modern-navbar">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'home' %}" class="navbar-brand">
+                    <i class="fas fa-plane-departure me-2"></i>TravelTrip
+                </a>
+                
+                <ul class="nav d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'flights' %}">
+                            <i class="fas fa-plane me-1"></i>Flights
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'hotels' %}">
+                            <i class="fas fa-bed me-1"></i>Hotels
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'package' %}">
+                            <i class="fas fa-suitcase me-1"></i>Packages
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item ms-3">
+                            <a class="btn btn-outline-modern" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item ms-3">
+                            <a class="btn btn-outline-modern me-2" href="{% url 'login_url' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary-modern" href="{% url 'register_url' %}">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-content fade-in">
+                <h1 class="hero-title">
+                    <i class="fas fa-bed me-3"></i>Find Your Perfect Stay
+                </h1>
+                <p class="hero-subtitle">Discover comfortable accommodations from luxury resorts to budget-friendly options</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container my-5">
+        <!-- Search Form -->
+        <div class="modern-form mb-5 slide-up">
+            <h2 class="h3 mb-4">
+                <i class="fas fa-search me-2 text-success"></i>
+                Search Hotels
+            </h2>
+            
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-map-marker-alt me-1"></i>Destination
+                            </label>
+                            {{ form.city.as_widget }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-calendar me-1"></i>Check-in Date
+                            </label>
+                            {{ form.date.as_widget }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary-modern btn-lg">
+                        <i class="fas fa-search me-2"></i>Search Hotels
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Hotel Results -->
+        {% if Hotels %}
+        <div class="slide-up" style="animation-delay: 0.1s;">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 class="h3 mb-0">
+                    <i class="fas fa-bed me-2 text-success"></i>
+                    Available Hotels
+                </h2>
+                <div class="text-muted">
+                    {{ Hotels|length }} hotel{{ Hotels|length|pluralize }} found for {{ date }}
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                {% for hotel in Hotels %}
+                <div class="col-lg-6">
+                    <div class="modern-card">
+                        <div class="row g-0">
+                            <div class="col-md-4 hotel-image-container">
+                                {% if hotel.image1 %}
+                                    <img src="/media/{{ hotel.image1 }}" 
+                                         class="img-fluid rounded-start" 
+                                         alt="{{ hotel.hotel_name }}"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="bg-light rounded-start d-flex align-items-center justify-content-center" style="display: none; min-height: 250px; width: 100%; height: 100%;">
+                                        <i class="fas fa-bed fa-3x text-muted"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="bg-light rounded-start d-flex align-items-center justify-content-center"
+                                         style="min-height: 250px; width: 100%; height: 100%;">
+                                        <i class="fas fa-bed fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-1">{{ hotel.hotel_name }}</h5>
+                                        <div class="text-end">
+                                            <div class="h4 text-success mb-0">₹{{ hotel.hotel_price }}</div>
+                                            <small class="text-muted">per night</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= hotel.hotel_rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-muted"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ms-1 text-muted">({{ hotel.hotel_rating }}/5)</span>
+                                    </div>
+                                    
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ hotel.hotel_address }}
+                                    </p>
+                                    
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-plane me-1"></i>
+                                        {{ hotel.distfromap }} KM from airport
+                                    </p>
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-wifi me-1"></i>
+                                            {{ hotel.amenities|truncatechars:50 }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-door-open me-1"></i>
+                                            {{ hotel.rooms }} rooms available
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        {% if user.is_authenticated %}
+                                            <a href="/bookhotel/{{ hotel.hotel_name }}/{{ date }}" 
+                                               class="btn btn-primary-modern">
+                                                <i class="fas fa-bed me-1"></i>Book Now
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'login_url' %}" 
+                                               class="btn btn-primary-modern">
+                                                <i class="fas fa-sign-in-alt me-1"></i>Login to Book
+                                            </a>
+                                        {% endif %}
+                                        <button class="btn btn-outline-modern" onclick="toggleHotelDetails('{{ hotel.id }}')">
+                                            <i class="fas fa-info-circle me-1"></i>Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hotel Details (Hidden by default) -->
+                        <div id="hotel-details-{{ hotel.id }}" class="mt-3 p-3 bg-light rounded" style="display: none;">
+                            <h6><i class="fas fa-info-circle me-1"></i>Hotel Information</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Name:</strong> {{ hotel.hotel_name }}</li>
+                                        <li><strong>Rating:</strong> {{ hotel.hotel_rating }}/5 stars</li>
+                                        <li><strong>Total Rooms:</strong> {{ hotel.rooms }}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Location:</strong> {{ hotel.hotel_address }}</li>
+                                        <li><strong>Airport Distance:</strong> {{ hotel.distfromap }} KM</li>
+                                        <li><strong>Amenities:</strong> {{ hotel.amenities }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif form.is_bound %}
+        <div class="slide-up" style="animation-delay: 0.1s;">
+            <div class="modern-card text-center">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h3 class="h4 mb-3">No Hotels Found</h3>
+                <p class="text-muted mb-4">
+                    Sorry, we couldn't find any hotels for your search criteria. 
+                    Try different dates or destinations.
+                </p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'hotels' %}" class="btn btn-primary-modern">
+                        <i class="fas fa-redo me-1"></i>New Search
+                    </a>
+                    <a href="{% url 'package' %}" class="btn btn-outline-modern">
+                        <i class="fas fa-suitcase me-1"></i>Try Packages
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="slide-up" style="animation-delay: 0.1s;">
+            <div class="modern-card text-center">
+                <i class="fas fa-bed fa-3x text-success mb-3"></i>
+                <h3 class="h4 mb-3">Find Your Perfect Stay</h3>
+                <p class="text-muted mb-4">
+                    Enter your destination and dates above to discover amazing hotels
+                </p>
+                <div class="row g-3 mt-4">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-star text-warning mb-2"></i>
+                            <h6>Quality Assured</h6>
+                            <small class="text-muted">Verified hotels with ratings</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-credit-card text-primary mb-2"></i>
+                            <h6>Easy Booking</h6>
+                            <small class="text-muted">Simple and secure payment</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-phone text-success mb-2"></i>
+                            <h6>24/7 Support</h6>
+                            <small class="text-muted">Help when you need it</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Popular Destinations -->
+        <div class="mt-5 slide-up" style="animation-delay: 0.2s;">
+            <div class="modern-card">
+                <h3 class="h4 mb-4">
+                    <i class="fas fa-fire me-2 text-danger"></i>
+                    Popular Hotel Destinations
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-city fa-2x text-primary mb-2"></i>
+                            <h6>Delhi Hotels</h6>
+                            <small class="text-muted">5 hotels available</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-building fa-2x text-success mb-2"></i>
+                            <h6>Mumbai Hotels</h6>
+                            <small class="text-muted">5 hotels available</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-umbrella-beach fa-2x text-warning mb-2"></i>
+                            <h6>Goa Hotels</h6>
+                            <small class="text-muted">2 hotels available</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-mountain fa-2x text-info mb-2"></i>
+                            <h6>Srinagar Hotels</h6>
+                            <small class="text-muted">3 hotels available</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <h1 class="fff">BOOK</h1>
-    </a>
-  </div>
-  </div>
 
-{% endfor %}
-{% endblock %}
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add modern styling to form inputs
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.classList.add('form-control-modern');
+            });
 
+            // Animate elements on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.slide-up').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s ease-out';
+                observer.observe(el);
+            });
+        });
+
+        function toggleHotelDetails(hotelId) {
+            const details = document.getElementById('hotel-details-' + hotelId);
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,45 +1,502 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
-<div class="fd">
-  <br><br><br><br><br>
-<div class="container form">
-  <h1 class="tr">PACKAGES</h1>
-  <br><br>
-  <div class="row">
-    <div class="col-md-3"></div>
-    <div class="col-md-6 shadow-lg p-3 mb-5 bg-white rounded">
-  <form class="form-group" action="" method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button class="btn btn-primary">SEARCH</button>
-  </form></div>
-  <div class="col-md-3"></div>
-</div>
-</div>
-</div><br><br>
-<h2 class="trr">Places</h2>
+<style>
+    /* Enhanced Places Page Styles */
+    .places-hero {
+        background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+    
+    .places-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="white" opacity="0.1"><circle cx="10" cy="10" r="2"/><circle cx="30" cy="10" r="2"/><circle cx="50" cy="10" r="2"/><circle cx="70" cy="10" r="2"/><circle cx="90" cy="10" r="2"/></svg>');
+        background-size: 100px 20px;
+        animation: float 20s infinite linear;
+    }
+    
+    @keyframes float {
+        0% { transform: translateX(-100px); }
+        100% { transform: translateX(100vw); }
+    }
+    
+    .places-hero h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .places-hero p {
+        font-size: 1.25rem;
+        opacity: 0.95;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .modern-search-form {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin-bottom: 3rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .modern-search-form h2 {
+        color: #1f2937;
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .modern-search-form h2 i {
+        color: #2563eb;
+    }
+    
+    .form-group-modern {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label-modern {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #374151;
+        font-size: 1rem;
+    }
+    
+    .form-control-modern {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+    
+    .form-control-modern:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .btn-search-modern {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
+        padding: 0.875rem 2rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-search-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+    }
+    
+    .suggestion-chips {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    
+    .suggestion-chip {
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .suggestion-chip:hover {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+        transform: translateY(-2px);
+    }
+    
+    .places-section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+    
+    .places-section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+        border-radius: 2px;
+    }
+    
+    .place-card-modern {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 2rem;
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .place-card-modern:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .place-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        height: 350px;
+    }
+    
+    .place-image-modern {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .place-card-modern:hover .place-image-modern {
+        transform: scale(1.1);
+    }
+    
+    .place-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        color: #1f2937;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 2;
+    }
+    
+    .place-overlay-gradient {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        z-index: 1;
+    }
+    
+    .place-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .place-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.75rem;
+    }
+    
+    .place-content p {
+        color: #6b7280;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+    
+    .place-city-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #2563eb;
+        font-weight: 600;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .no-results i {
+        font-size: 4rem;
+        color: #9ca3af;
+        margin-bottom: 1rem;
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .places-hero h1 {
+            font-size: 2rem;
+        }
+        
+        .places-hero p {
+            font-size: 1rem;
+        }
+        
+        .modern-search-form {
+            padding: 1.5rem;
+        }
+        
+        .places-section-title {
+            font-size: 2rem;
+        }
+        
+        .place-image-wrapper {
+            height: 250px;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="places-hero">
+    <div class="container">
+        <h1><i class="fas fa-compass me-3"></i>Discover Amazing Places</h1>
+        <p>Explore breathtaking destinations and plan your perfect journey</p>
+    </div>
+</section>
+
 <div class="container">
-{% for k in Famplace %}
-<!-- <tr>
-  <td width="200"><center><img src="/media/{{ k.image }}" alt="image"></center></td>
-  <td width="150" height="100"><center>{{ k.city }}</center></td>
-  <td width="200"><center>{{k.place_name}}</center></td>
-  <td width="200"><center>{{k.desc}}</center></td>
-</tr> -->
-<div class="row mt-5 mb-5 fly-box">
-  <div class="col-md-1"></div>
-  <div class="col-md-4 shadow-lg p-3 rounded p-box">
-    <img class="p-img" src="/media/{{ k.image }}" alt="image">
-  </div>
-  <div class="col-md-6 shadow-lg p-3 desc rounded">
-    <h2>{{k.place_name}}</h2>
-    <p>{{k.desc}}</p>
-  </div>
-  <h1 class="fly">{{k.place_name}}</h1>
+    <!-- Modern Search Form -->
+    <div class="modern-search-form slide-up">
+        <h2>
+            <i class="fas fa-search"></i>
+            Search Destinations
+        </h2>
+        <form method="POST" action="">
+            {% csrf_token %}
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>City or Destination
+                        </label>
+                        {{ form.city.as_widget }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn-search-modern w-100">
+                        <i class="fas fa-search"></i>
+                        SEARCH
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick Search Suggestions -->
+            <div class="suggestion-chips">
+                <span class="text-muted me-2" style="align-self: center;">Popular:</span>
+                <div class="suggestion-chip" onclick="fillCity('Delhi')">
+                    <i class="fas fa-city"></i>Delhi
+                </div>
+                <div class="suggestion-chip" onclick="fillCity('Mumbai')">
+                    <i class="fas fa-building"></i>Mumbai
+                </div>
+                <div class="suggestion-chip" onclick="fillCity('Goa')">
+                    <i class="fas fa-umbrella-beach"></i>Goa
+                </div>
+                <div class="suggestion-chip" onclick="fillCity('Srinagar')">
+                    <i class="fas fa-mountain"></i>Srinagar
+                </div>
+                <div class="suggestion-chip" onclick="fillCity('Cochin')">
+                    <i class="fas fa-water"></i>Cochin
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Places Section -->
+    {% if Famplace %}
+    <h2 class="places-section-title fade-in">Places</h2>
+    <div class="row">
+        {% for k in Famplace %}
+        <div class="col-lg-6 col-md-6 mb-4 fade-in" style="animation-delay: {{ forloop.counter0|add:'0.1' }}s;">
+            <div class="place-card-modern">
+                <div class="place-image-wrapper">
+                    {% if k.image %}
+                    <img src="/media/{{ k.image }}" alt="{{ k.place_name }}" class="place-image-modern">
+                    {% else %}
+                    <div class="place-image-modern bg-light d-flex align-items-center justify-content-center">
+                        <i class="fas fa-camera fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="place-overlay-gradient"></div>
+                    {% if k.city %}
+                    <div class="place-badge">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ k.city.city }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="place-content">
+                    <h3>{{ k.place_name }}</h3>
+                    <p>{{ k.desc }}</p>
+                    {% if k.city %}
+                    <div class="place-city-info">
+                        <i class="fas fa-city"></i>
+                        <span>{{ k.city.city }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Call to Action -->
+    <div class="text-center mt-5 mb-5 fade-in">
+        <div class="modern-search-form">
+            <h4 class="mb-3">Ready to Visit These Amazing Places?</h4>
+            <p class="text-muted mb-4">Book your complete travel package and start your adventure</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{% url 'package' %}" class="btn-search-modern" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-suitcase"></i>Browse Packages
+                </a>
+                <a href="{% url 'flights' %}" class="btn-search-modern" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <i class="fas fa-plane"></i>Book Flights
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% elif form.is_bound %}
+    <!-- No Results -->
+    <div class="no-results fade-in">
+        <i class="fas fa-search"></i>
+        <h3 class="mb-3">No Places Found</h3>
+        <p class="text-muted mb-4">
+            Sorry, we couldn't find any places for "{{ form.city.value }}". 
+            Try searching for other popular destinations.
+        </p>
+        <a href="{% url 'places' %}" class="btn-search-modern">
+            <i class="fas fa-redo"></i>New Search
+        </a>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="no-results fade-in">
+        <i class="fas fa-compass"></i>
+        <h3 class="mb-3">Discover Your Next Adventure</h3>
+        <p class="text-muted mb-4">
+            Search for destinations above to discover amazing places to visit
+        </p>
+    </div>
+    {% endif %}
 </div>
 
-{% endfor %}
-</div>
+<script>
+    // Add modern styling to form inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input[name="city"]');
+        inputs.forEach(input => {
+            input.classList.add('form-control-modern');
+        });
+        
+        // Animate cards on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    });
+    
+    function fillCity(cityName) {
+        const cityInput = document.querySelector('input[name="city"]');
+        if (cityInput) {
+            cityInput.value = cityName;
+            cityInput.focus();
+        }
+    }
+</script>
 
 {% endblock %}

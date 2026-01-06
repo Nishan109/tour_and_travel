@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import redirect
 from . import views
 from django.contrib.auth.views import LoginView,LogoutView
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -10,18 +11,21 @@ urlpatterns = [
     path('', views.IndexView, name="home"),
     path('accounts/login/',LoginView.as_view(authentication_form=UserLoginForm),name="login_url"),
     path('register/',views.registerView,name="register_url"),
-    path('logout/',LogoutView.as_view(next_page='home'),name="logout"),
+    path('logout/',views.custom_logout,name="logout"),
     path('package/',views.PackageView,name="package"),
     path('flights/',views.FlightView,name="flights"),
     path('hotels/',views.HotelView,name="hotels"),
     path('places/',views.PlacesView,name="places"),
     path('bookflight/<str:flight_num>/<str:date>',views.Flightbook,name="bookflight"),
     path('userflight/<str:flight_num>/<str:date>/<int:seat>',views.FlightSubmit,name='userflight'),
-    path('bookhotel/<str:hotel>/<str:date>',views.Hotelbook,name="bookflight"),
-    path('userhotel/<str:hotel>/<str:date>/<int:room>',views.HotelSubmit,name='userflight'),
+    path('bookhotel/<str:hotel>/<str:date>',views.Hotelbook,name="bookhotel"),
+    path('userhotel/<str:hotel>/<str:date>/<int:room>',views.HotelSubmit,name='userhotel'),
     path('bookpackage/<str:source>/<str:city>/<str:date>',views.PackageBook,name="bookpackage"),
     path('userpackage/<str:flight>/<str:hotel>/<str:date>/<int:room>/<int:seat>',views.PackageSubmit,name='userpackage'),
     path('accounts/profile/',views.Dashboard,name='dashboard'),
+    # Add redirects for common mistyped dashboard URLs
+    path('profile/',lambda request: redirect('dashboard')),
+    path('flights/profile/',lambda request: redirect('dashboard')),
     path('cancelflight/<str:flight>/<str:date>/<int:seat>',views.CancelFlight,name='CancelFlight'),
     path('concanflight/<str:flight>/<str:date>/<int:seat>',views.ConfirmCancelFlight,name='ConfirmCancelFlight'),
     path('cancelhotel/<str:hotel>/<str:date>/<int:room>',views.CancelHotel,name='CancelHotel'),

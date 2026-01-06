@@ -3,13 +3,25 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from .forms import SignUpForm,HotelForm,FlightForm,ChoiceForm,SeatForm,RoomForm,CityForm
 from .models import Flights,Hotels,Famous,BookFlight,BookHotel,BookPackage,City
 
 # Create your views here.
 
 def IndexView(request):
-    return render(request,'index.html')
+    # Provide quick search forms on the landing page
+    return render(request, 'index.html', {
+        'flight_form': FlightForm(),
+        'hotel_form': HotelForm(),
+    })
+
+def custom_logout(request):
+    """Custom logout view that handles both GET and POST requests"""
+    logout(request)
+    return HttpResponseRedirect(reverse('home'))
 
 def PackageView(request):
     form = FlightForm(request.POST)
@@ -87,9 +99,26 @@ def FlightView(request):
 @login_required
 def Dashboard(request):
     user = request.user
+    print(f"=== DASHBOARD DEBUG ===")
+    print(f"User: {user.username} (ID: {user.id})")
+    
     f1 = BookFlight.objects.filter(username_id=user)
     h1 = BookHotel.objects.filter(username_id=user)
     p1 = BookPackage.objects.filter(username_id=user)
+    
+    print(f"Flight bookings found: {f1.count()}")
+    print(f"Hotel bookings found: {h1.count()}")
+    print(f"Package bookings found: {p1.count()}")
+    
+    for flight in f1:
+        print(f"  Flight: {flight.flight} on {flight.date} ({flight.seat} seats)")
+    
+    # Check if there are ANY bookings for this user in the database
+    all_user_flights = BookFlight.objects.filter(username_id=user)
+    print(f"Total flight bookings in DB for {user.username}: {all_user_flights.count()}")
+    
+    print(f"=== END DASHBOARD DEBUG ===")
+    
     f={'flights':f1}
     h={'hotels':h1}
     p={'packages':p1}
@@ -139,8 +168,64 @@ def Flightbook(request,flight_num=None,date=None):
 @login_required
 def FlightSubmit(request,flight_num=None,date=None,seat=None):
     user = request.user
-    b = BookFlight(username_id=user,flight=flight_num,date=date,seat=seat)
-    b.save()
+    
+    # Add comprehensive debugging
+    print(f"=== FLIGHT BOOKING DEBUG ===")
+    print(f"User: {user.username} (ID: {user.id})")
+    print(f"Flight: {flight_num}")
+    print(f"Date: {date}")
+    print(f"Seats: {seat}")
+    print(f"Request method: {request.method}")
+    
+    # Standardize date format to avoid issues
+    from datetime import datetime
+    try:
+        # Try to parse the date and convert to standard format
+        if date:
+            # Handle different date formats
+            try:
+                # Try YYYY-MM-DD format first
+                parsed_date = datetime.strptime(date, '%Y-%m-%d')
+                standardized_date = parsed_date.strftime('%B %d, %Y')
+                print(f"Date converted from '{date}' to '{standardized_date}'")
+            except ValueError:
+                # If that fails, use the date as-is
+                standardized_date = date
+                print(f"Date used as-is: '{standardized_date}'")
+        else:
+            standardized_date = date
+            print(f"No date provided")
+    except Exception as e:
+        standardized_date = date
+        print(f"Date parsing error: {e}")
+    
+    try:
+        print(f"Creating BookFlight object...")
+        b = BookFlight(username_id=user,flight=flight_num,date=standardized_date,seat=seat)
+        print(f"BookFlight object created: {b}")
+        
+        print(f"Saving to database...")
+        b.save()
+        print(f"Booking saved successfully with ID: {b.id}")
+        
+        # Verify the booking was saved
+        verification = BookFlight.objects.filter(username_id=user, flight=flight_num, date=standardized_date, seat=seat).first()
+        if verification:
+            # Using ASCII-only logging to avoid encoding issues on some consoles
+            print(f"[OK] Booking verified in database: ID {verification.id}")
+        else:
+            print("[WARN] Booking NOT found in database after save!")
+            
+        # Check total bookings for this user
+        total_bookings = BookFlight.objects.filter(username_id=user).count()
+        print(f"Total bookings for {user.username}: {total_bookings}")
+        
+    except Exception as e:
+        print(f"[ERROR] Error saving booking: {e}")
+        import traceback
+        traceback.print_exc()
+    
+    print(f"=== END DEBUG ===")
     return redirect('dashboard')
 
 @login_required
@@ -180,7 +265,7 @@ def Hotelbook(request,hotel=None,date=None):
         else:
             return render(request,'bookhotel.html',{'form':form})
     else:
-        return render(request,'bookflight.html',{'form':form})
+        return render(request,'bookhotel.html',{'form':form})
 
 @login_required
 def HotelSubmit(request,hotel=None,date=None,room=None):
@@ -191,10 +276,14 @@ def HotelSubmit(request,hotel=None,date=None,room=None):
 
 @login_required
 def PackageBook(request,source,city,date):
-    c1={}
-    d1={}
+    c = None
+    d = None
+    c1 = None
+    d1 = None
     roomrem=0
     price1=0
+    price=0
+    seatrem=0
     cs = 0;
     cs1 = 0;
     form = ChoiceForm(request.POST)
@@ -205,39 +294,54 @@ def PackageBook(request,source,city,date):
     form1 = {'form': form}
     if request.method=="POST":
         if form.is_valid():
-            flight = form.cleaned_data['flight'].upper()
-            hotel = form.cleaned_data['hotel']
-            seats = form.cleaned_data['seats']
-            room = form.cleaned_data['rooms']
+            flight = form.cleaned_data.get('flight', '').upper()
+            hotel = form.cleaned_data.get('hotel', '')
+            seats = form.cleaned_data.get('seats', 0) or 0
+            room = form.cleaned_data.get('rooms', 0) or 0
             flights = Flights.objects.filter(flight_num=flight)
             hotels = Hotels.objects.filter(hotel_name=hotel)
-            for i in flights:
-                c = BookFlight.objects.filter(flight=i.flight_num).filter(date=date)
-                d = BookPackage.objects.filter(flight=i.flight_num).filter(date=date)
-                price = seats*i.eprice
-                seatrem = i.seats
-            for j in c:
-                cs = cs + j.seat
-            for k in d:
-                cs = cs + k.seat
-            seatrem = seatrem - cs
-            if (seatrem-seats) > 0:
-                availf = "available"
+            
+            # Process flight availability
+            if flights.exists():
+                for i in flights:
+                    c = BookFlight.objects.filter(flight=i.flight_num).filter(date=date)
+                    d = BookPackage.objects.filter(flight=i.flight_num).filter(date=date)
+                    if seats and seats > 0:
+                        price = seats*i.eprice
+                    seatrem = i.seats
+                if c:
+                    for j in c:
+                        cs = cs + j.seat
+                if d:
+                    for k in d:
+                        cs = cs + k.seat
+                seatrem = seatrem - cs
+                if seats and seatrem and (seatrem-seats) > 0:
+                    availf = "available"
+                else:
+                    availf = "unavailable"
             else:
                 availf = "unavailable"
 
-            for l in hotels:
-                c1 = BookHotel.objects.filter(hotel_name=l.hotel_name).filter(date=date)
-                d1 = BookPackage.objects.filter(hotel_name=l.hotel_name).filter(date=date)
-                price1 = room*l.hotel_price
-                roomrem = l.rooms
-            for m in c1:
-                cs1 = cs1 + m.room
-            for n in d1:
-                cs1 = cs1 + n.room
-            roomrem = roomrem - cs1
-            if (roomrem-room) > 0:
-                availh = "available"
+            # Process hotel availability
+            if hotels.exists():
+                for l in hotels:
+                    c1 = BookHotel.objects.filter(hotel_name=l.hotel_name).filter(date=date)
+                    d1 = BookPackage.objects.filter(hotel_name=l.hotel_name).filter(date=date)
+                    if room and room > 0:
+                        price1 = room*l.hotel_price
+                    roomrem = l.rooms
+                if c1:
+                    for m in c1:
+                        cs1 = cs1 + m.room
+                if d1:
+                    for n in d1:
+                        cs1 = cs1 + n.room
+                roomrem = roomrem - cs1
+                if room and roomrem and (roomrem-room) > 0:
+                    availh = "available"
+                else:
+                    availh = "unavailable"
             else:
                 availh = "unavailable"
 

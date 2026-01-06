@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Discover Places - TravelTrip</title>
+    
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Modern Styles -->
+    <link rel="stylesheet" href="{% static 'css/modern-style.css' %}">
+    
+    <style>
+        .place-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--border-radius-lg);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .place-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .place-image {
+            height: 300px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .place-card:hover .place-image {
+            transform: scale(1.05);
+        }
+        
+        .place-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 2rem;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .place-card:hover .place-overlay {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .place-info {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .hero-places {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-places::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="white" opacity="0.1"><circle cx="10" cy="10" r="2"/><circle cx="30" cy="10" r="2"/><circle cx="50" cy="10" r="2"/><circle cx="70" cy="10" r="2"/><circle cx="90" cy="10" r="2"/></svg>');
+            background-size: 100px 20px;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(100vw); }
+        }
+        
+        .destination-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.9);
+            color: var(--text-dark);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-suggestions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .suggestion-chip {
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .suggestion-chip:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .masonry-grid {
+            column-count: 3;
+            column-gap: 1.5rem;
+        }
+        
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .masonry-grid {
+                column-count: 1;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .masonry-grid {
+                column-count: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Navigation -->
+    <nav class="modern-navbar">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'home' %}" class="navbar-brand">
+                    <i class="fas fa-plane-departure me-2"></i>TravelTrip
+                </a>
+                
+                <ul class="nav d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'flights' %}">
+                            <i class="fas fa-plane me-1"></i>Flights
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'hotels' %}">
+                            <i class="fas fa-bed me-1"></i>Hotels
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'package' %}">
+                            <i class="fas fa-suitcase me-1"></i>Packages
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'places' %}">
+                            <i class="fas fa-map-marker-alt me-1"></i>Places
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item ms-3">
+                            <a class="btn btn-outline-modern" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item ms-3">
+                            <a class="btn btn-outline-modern me-2" href="{% url 'login_url' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary-modern" href="{% url 'register_url' %}">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-places">
+        <div class="container">
+            <div class="hero-content fade-in">
+                <h1 class="hero-title">
+                    <i class="fas fa-compass me-3"></i>Discover Amazing Places
+                </h1>
+                <p class="hero-subtitle">Explore breathtaking destinations and hidden gems around the world</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container my-5">
+        <!-- Search Form -->
+        <div class="modern-form mb-5 slide-up">
+            <h2 class="h3 mb-4">
+                <i class="fas fa-search me-2 text-info"></i>
+                Search Destinations
+            </h2>
+            
+            <form method="POST" action="">
+                {% csrf_token %}
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-map-marker-alt me-1"></i>City or Destination
+                            </label>
+                            {{ form.city.as_widget }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary-modern btn-lg w-100">
+                            <i class="fas fa-search me-2"></i>Explore Places
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search Suggestions -->
+                <div class="search-suggestions">
+                    <span class="text-muted me-2">Popular:</span>
+                    <div class="suggestion-chip" onclick="fillCity('Delhi')">
+                        <i class="fas fa-city me-1"></i>Delhi
+                    </div>
+                    <div class="suggestion-chip" onclick="fillCity('Mumbai')">
+                        <i class="fas fa-building me-1"></i>Mumbai
+                    </div>
+                    <div class="suggestion-chip" onclick="fillCity('Goa')">
+                        <i class="fas fa-umbrella-beach me-1"></i>Goa
+                    </div>
+                    <div class="suggestion-chip" onclick="fillCity('Srinagar')">
+                        <i class="fas fa-mountain me-1"></i>Srinagar
+                    </div>
+                    <div class="suggestion-chip" onclick="fillCity('Cochin')">
+                        <i class="fas fa-water me-1"></i>Cochin
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Places Results -->
+        {% if Famplace %}
+        <div class="slide-up" style="animation-delay: 0.1s;">
+            <div class="text-center mb-5">
+                <h2 class="display-4 mb-3">Amazing Places to Visit</h2>
+                <p class="lead text-muted">{{ Famplace|length }} incredible destination{{ Famplace|length|pluralize }} found</p>
+            </div>
+            
+            <!-- Masonry Grid Layout -->
+            <div class="masonry-grid">
+                {% for place in Famplace %}
+                <div class="masonry-item">
+                    <div class="place-card modern-card p-0">
+                        {% if place.image %}
+                            <img src="/media/{{ place.image }}" 
+                                 class="place-image w-100" 
+                                 alt="{{ place.place_name }}"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="place-image w-100 bg-light d-flex align-items-center justify-content-center">
+                                <i class="fas fa-camera fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Destination Badge -->
+                        <div class="destination-badge">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ place.city.city }}
+                        </div>
+                        
+                        <!-- Place Info -->
+                        <div class="place-info">
+                            <h4 class="mb-2">{{ place.place_name }}</h4>
+                            <p class="mb-0 small">{{ place.desc|truncatechars:100 }}</p>
+                        </div>
+                        
+                        <!-- Hover Overlay -->
+                        <div class="place-overlay">
+                            <h5 class="mb-3">{{ place.place_name }}</h5>
+                            <p class="mb-3">{{ place.desc }}</p>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'flights' %}" class="btn btn-primary-modern btn-sm">
+                                    <i class="fas fa-plane me-1"></i>Book Flight
+                                </a>
+                                <a href="{% url 'hotels' %}" class="btn btn-outline-modern btn-sm">
+                                    <i class="fas fa-bed me-1"></i>Find Hotels
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Call to Action -->
+            <div class="text-center mt-5">
+                <div class="modern-card">
+                    <h4 class="mb-3">Ready to Visit These Amazing Places?</h4>
+                    <p class="text-muted mb-4">Book your complete travel package and start your adventure</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'package' %}" class="btn btn-secondary-modern">
+                            <i class="fas fa-suitcase me-2"></i>Browse Packages
+                        </a>
+                        <a href="{% url 'flights' %}" class="btn btn-outline-modern">
+                            <i class="fas fa-plane me-2"></i>Book Flights
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% elif form.is_bound %}
+        <div class="slide-up" style="animation-delay: 0.1s;">
+            <div class="modern-card text-center">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h3 class="h4 mb-3">No Places Found</h3>
+                <p class="text-muted mb-4">
+                    Sorry, we couldn't find any places for "{{ form.city.value }}". 
+                    Try searching for other popular destinations.
+                </p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'places' %}" class="btn btn-primary-modern">
+                        <i class="fas fa-redo me-1"></i>New Search
+                    </a>
+                    <a href="{% url 'package' %}" class="btn btn-outline-modern">
+                        <i class="fas fa-suitcase me-1"></i>Browse Packages
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="slide-up" style="animation-delay: 0.1s;">
+            <div class="modern-card text-center">
+                <i class="fas fa-compass fa-3x text-info mb-3"></i>
+                <h3 class="h4 mb-3">Discover Your Next Adventure</h3>
+                <p class="text-muted mb-4">
+                    Search for destinations above to discover amazing places to visit
+                </p>
+                
+                <!-- Featured Destinations Preview -->
+                <div class="row g-3 mt-4">
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-landmark text-warning mb-2"></i>
+                            <h6>Historical Sites</h6>
+                            <small class="text-muted">Ancient monuments and heritage</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-mountain text-success mb-2"></i>
+                            <h6>Natural Wonders</h6>
+                            <small class="text-muted">Mountains, lakes, and landscapes</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-umbrella-beach text-primary mb-2"></i>
+                            <h6>Beach Destinations</h6>
+                            <small class="text-muted">Coastal beauty and relaxation</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-city text-danger mb-2"></i>
+                            <h6>Urban Attractions</h6>
+                            <small class="text-muted">City life and modern culture</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Popular Destinations -->
+        <div class="mt-5 slide-up" style="animation-delay: 0.2s;">
+            <div class="modern-card">
+                <h3 class="h4 mb-4">
+                    <i class="fas fa-fire me-2 text-danger"></i>
+                    Popular Destinations
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-city fa-2x text-primary mb-2"></i>
+                            <h6>Delhi</h6>
+                            <small class="text-muted">Capital attractions</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-building fa-2x text-success mb-2"></i>
+                            <h6>Mumbai</h6>
+                            <small class="text-muted">Financial capital</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-umbrella-beach fa-2x text-warning mb-2"></i>
+                            <h6>Goa</h6>
+                            <small class="text-muted">Beach paradise</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-mountain fa-2x text-info mb-2"></i>
+                            <h6>Srinagar</h6>
+                            <small class="text-muted">Kashmir beauty</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-water fa-2x text-primary mb-2"></i>
+                            <h6>Cochin</h6>
+                            <small class="text-muted">Backwater charm</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="p-3 border rounded text-center">
+                            <i class="fas fa-leaf fa-2x text-success mb-2"></i>
+                            <h6>Darjeeling</h6>
+                            <small class="text-muted">Hill station</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add modern styling to form inputs
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.classList.add('form-control-modern');
+            });
+
+            // Animate elements on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.slide-up').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s ease-out';
+                observer.observe(el);
+            });
+
+            // Stagger animation for masonry items
+            document.querySelectorAll('.masonry-item').forEach((item, index) => {
+                item.style.animationDelay = `${index * 0.1}s`;
+                item.classList.add('fade-in');
+            });
+        });
+
+        function fillCity(cityName) {
+            const cityInput = document.querySelector('input[name="city"]') || document.querySelector('select[name="city"]');
+            if (cityInput) {
+                cityInput.value = cityName;
+                cityInput.focus();
+            }
+        }
+
+        // Add parallax effect to hero section
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-places');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+    </script>
+</body>
+</html>

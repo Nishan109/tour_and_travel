@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Search Flights - TravelTrip</title>
+    <title>Search Hotels - TravelTrip</title>
     
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,9 +80,9 @@
         <div class="container">
             <div class="hero-content fade-in">
                 <h1 class="hero-title">
-                    <i class="fas fa-plane me-3"></i>Find Your Perfect Flight
+                    <i class="fas fa-bed me-3"></i>Find Your Perfect Stay
                 </h1>
-                <p class="hero-subtitle">Search and compare flights from top airlines to get the best deals</p>
+                <p class="hero-subtitle">Discover comfortable accommodations from luxury resorts to budget-friendly options</p>
             </div>
         </div>
     </section>
@@ -91,33 +91,25 @@
         <!-- Search Form -->
         <div class="modern-form mb-5 slide-up">
             <h2 class="h3 mb-4">
-                <i class="fas fa-search me-2 text-primary"></i>
-                Search Flights
+                <i class="fas fa-search me-2 text-success"></i>
+                Search Hotels
             </h2>
             
             <form method="POST" action="">
                 {% csrf_token %}
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group-modern">
                             <label class="form-label-modern">
-                                <i class="fas fa-plane-departure me-1"></i>From
-                            </label>
-                            {{ form.source.as_widget }}
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group-modern">
-                            <label class="form-label-modern">
-                                <i class="fas fa-plane-arrival me-1"></i>To
+                                <i class="fas fa-map-marker-alt me-1"></i>Destination
                             </label>
                             {{ form.destination.as_widget }}
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group-modern">
                             <label class="form-label-modern">
-                                <i class="fas fa-calendar me-1"></i>Departure Date
+                                <i class="fas fa-calendar me-1"></i>Check-in Date
                             </label>
                             {{ form.date.as_widget }}
                         </div>
@@ -126,116 +118,124 @@
                 
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary-modern btn-lg">
-                        <i class="fas fa-search me-2"></i>Search Flights
+                        <i class="fas fa-search me-2"></i>Search Hotels
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Flight Results -->
-        {% if Flights %}
+        <!-- Hotel Results -->
+        {% if Hotels %}
         <div class="slide-up" style="animation-delay: 0.1s;">
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h2 class="h3 mb-0">
-                    <i class="fas fa-list me-2 text-primary"></i>
-                    Available Flights
+                    <i class="fas fa-bed me-2 text-success"></i>
+                    Available Hotels
                 </h2>
                 <div class="text-muted">
-                    {{ Flights|length }} flight{{ Flights|length|pluralize }} found for {{ date }}
+                    {{ Hotels|length }} hotel{{ Hotels|length|pluralize }} found for {{ date }}
                 </div>
             </div>
             
             <div class="row g-4">
-                {% for flight in Flights %}
-                <div class="col-12">
-                    <div class="ticket-card">
-                        <div class="ticket-header">
-                            <div class="airline-info">
-                                <div class="airline-logo">
-                                    {{ flight.company|first }}
-                                </div>
-                                <div>
-                                    <div class="flight-number">{{ flight.company }}</div>
-                                    <small class="text-muted">{{ flight.flight_num }}</small>
-                                </div>
+                {% for hotel in Hotels %}
+                <div class="col-lg-6">
+                    <div class="modern-card">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                {% if hotel.image1 %}
+                                    <img src="/media/{{ hotel.image1 }}" 
+                                         class="img-fluid rounded-start h-100 object-fit-cover" 
+                                         alt="{{ hotel.hotel_name }}"
+                                         style="min-height: 200px;">
+                                {% else %}
+                                    <div class="bg-light rounded-start h-100 d-flex align-items-center justify-content-center"
+                                         style="min-height: 200px;">
+                                        <i class="fas fa-bed fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
                             </div>
-                            <div class="text-end">
-                                <div class="price">₹{{ flight.eprice }}</div>
-                                <div class="price-label">per person</div>
+                            <div class="col-md-8">
+                                <div class="p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-1">{{ hotel.hotel_name }}</h5>
+                                        <div class="text-end">
+                                            <div class="h4 text-success mb-0">₹{{ hotel.hotel_price }}</div>
+                                            <small class="text-muted">per night</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= hotel.hotel_rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-muted"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ms-1 text-muted">({{ hotel.hotel_rating }}/5)</span>
+                                    </div>
+                                    
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ hotel.hotel_address }}
+                                    </p>
+                                    
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-plane me-1"></i>
+                                        {{ hotel.distfromap }} KM from airport
+                                    </p>
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-wifi me-1"></i>
+                                            {{ hotel.amenities|truncatechars:50 }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-door-open me-1"></i>
+                                            {{ hotel.rooms }} rooms available
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2">
+                                        {% if user.is_authenticated %}
+                                            <a href="/bookhotel/{{ hotel.hotel_name }}/{{ date }}" 
+                                               class="btn btn-primary-modern">
+                                                <i class="fas fa-bed me-1"></i>Book Now
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'login_url' %}" 
+                                               class="btn btn-primary-modern">
+                                                <i class="fas fa-sign-in-alt me-1"></i>Login to Book
+                                            </a>
+                                        {% endif %}
+                                        <button class="btn btn-outline-modern" onclick="toggleHotelDetails('{{ hotel.id }}')">
+                                            <i class="fas fa-info-circle me-1"></i>Details
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="ticket-body">
-                            <div class="flight-detail">
-                                <div class="detail-label">
-                                    <i class="fas fa-plane-departure me-1"></i>Departure
-                                </div>
-                                <div class="detail-value">{{ flight.source }}</div>
-                                <small class="text-muted">{{ flight.dept_time }}</small>
-                            </div>
-                            
-                            <div class="flight-detail text-center">
-                                <div class="detail-label">
-                                    <i class="fas fa-clock me-1"></i>Duration
-                                </div>
-                                <div class="my-2">
-                                    <i class="fas fa-plane text-primary"></i>
-                                    <div class="border-top border-2 border-primary mt-1"></div>
-                                </div>
-                                <small class="text-muted">Direct Flight</small>
-                            </div>
-                            
-                            <div class="flight-detail">
-                                <div class="detail-label">
-                                    <i class="fas fa-plane-arrival me-1"></i>Arrival
-                                </div>
-                                <div class="detail-value">{{ flight.destination }}</div>
-                                <small class="text-muted">{{ flight.dest_time }}</small>
-                            </div>
-                            
-                            <div class="flight-detail">
-                                <div class="detail-label">
-                                    <i class="fas fa-users me-1"></i>Available Seats
-                                </div>
-                                <div class="detail-value">{{ flight.seats }}</div>
-                                <small class="text-success">Available</small>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex gap-2 mt-3">
-                            {% if user.is_authenticated %}
-                                <a href="/bookflight/{{ flight.flight_num }}/{{ date }}" 
-                                   class="btn btn-primary-modern">
-                                    <i class="fas fa-ticket-alt me-1"></i>Book Now
-                                </a>
-                            {% else %}
-                                <a href="{% url 'login_url' %}" 
-                                   class="btn btn-primary-modern">
-                                    <i class="fas fa-sign-in-alt me-1"></i>Login to Book
-                                </a>
-                            {% endif %}
-                            <button class="btn btn-outline-modern" onclick="toggleDetails('{{ flight.flight_num }}')">
-                                <i class="fas fa-info-circle me-1"></i>Flight Details
-                            </button>
-                        </div>
-                        
-                        <!-- Flight Details (Hidden by default) -->
-                        <div id="details-{{ flight.flight_num }}" class="mt-3 p-3 bg-light rounded" style="display: none;">
+                        <!-- Hotel Details (Hidden by default) -->
+                        <div id="hotel-details-{{ hotel.id }}" class="mt-3 p-3 bg-light rounded" style="display: none;">
+                            <h6><i class="fas fa-info-circle me-1"></i>Hotel Information</h6>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <h6><i class="fas fa-info-circle me-1"></i>Flight Information</h6>
                                     <ul class="list-unstyled mb-0">
-                                        <li><strong>Flight Number:</strong> {{ flight.flight_num }}</li>
-                                        <li><strong>Aircraft:</strong> {{ flight.company }}</li>
-                                        <li><strong>Total Seats:</strong> {{ flight.seats }}</li>
+                                        <li><strong>Name:</strong> {{ hotel.hotel_name }}</li>
+                                        <li><strong>Rating:</strong> {{ hotel.hotel_rating }}/5 stars</li>
+                                        <li><strong>Total Rooms:</strong> {{ hotel.rooms }}</li>
                                     </ul>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6><i class="fas fa-route me-1"></i>Route Details</h6>
                                     <ul class="list-unstyled mb-0">
-                                        <li><strong>From:</strong> {{ flight.source }}</li>
-                                        <li><strong>To:</strong> {{ flight.destination }}</li>
-                                        <li><strong>Date:</strong> {{ date }}</li>
+                                        <li><strong>Location:</strong> {{ hotel.hotel_address }}</li>
+                                        <li><strong>Airport Distance:</strong> {{ hotel.distfromap }} KM</li>
+                                        <li><strong>Amenities:</strong> {{ hotel.amenities }}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -249,13 +249,13 @@
         <div class="slide-up" style="animation-delay: 0.1s;">
             <div class="modern-card text-center">
                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                <h3 class="h4 mb-3">No Flights Found</h3>
+                <h3 class="h4 mb-3">No Hotels Found</h3>
                 <p class="text-muted mb-4">
-                    Sorry, we couldn't find any flights for your search criteria. 
+                    Sorry, we couldn't find any hotels for your search criteria. 
                     Try different dates or destinations.
                 </p>
                 <div class="d-flex gap-2 justify-content-center">
-                    <a href="{% url 'flights' %}" class="btn btn-primary-modern">
+                    <a href="{% url 'hotels' %}" class="btn btn-primary-modern">
                         <i class="fas fa-redo me-1"></i>New Search
                     </a>
                     <a href="{% url 'package' %}" class="btn btn-outline-modern">
@@ -267,31 +267,31 @@
         {% else %}
         <div class="slide-up" style="animation-delay: 0.1s;">
             <div class="modern-card text-center">
-                <i class="fas fa-plane fa-3x text-primary mb-3"></i>
-                <h3 class="h4 mb-3">Ready to Fly?</h3>
+                <i class="fas fa-bed fa-3x text-success mb-3"></i>
+                <h3 class="h4 mb-3">Find Your Perfect Stay</h3>
                 <p class="text-muted mb-4">
-                    Enter your travel details above to find the best flight deals
+                    Enter your destination and dates above to discover amazing hotels
                 </p>
                 <div class="row g-3 mt-4">
                     <div class="col-md-4">
                         <div class="p-3 bg-light rounded">
-                            <i class="fas fa-shield-alt text-success mb-2"></i>
-                            <h6>Secure Booking</h6>
-                            <small class="text-muted">Safe and secure payment</small>
+                            <i class="fas fa-star text-warning mb-2"></i>
+                            <h6>Quality Assured</h6>
+                            <small class="text-muted">Verified hotels with ratings</small>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 bg-light rounded">
-                            <i class="fas fa-tags text-warning mb-2"></i>
-                            <h6>Best Prices</h6>
-                            <small class="text-muted">Competitive flight fares</small>
+                            <i class="fas fa-credit-card text-primary mb-2"></i>
+                            <h6>Easy Booking</h6>
+                            <small class="text-muted">Simple and secure payment</small>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 bg-light rounded">
-                            <i class="fas fa-headset text-info mb-2"></i>
+                            <i class="fas fa-phone text-success mb-2"></i>
                             <h6>24/7 Support</h6>
-                            <small class="text-muted">Round-the-clock assistance</small>
+                            <small class="text-muted">Help when you need it</small>
                         </div>
                     </div>
                 </div>
@@ -304,35 +304,35 @@
             <div class="modern-card">
                 <h3 class="h4 mb-4">
                     <i class="fas fa-fire me-2 text-danger"></i>
-                    Popular Destinations
+                    Popular Hotel Destinations
                 </h3>
                 <div class="row g-3">
                     <div class="col-md-3">
                         <div class="p-3 border rounded text-center">
                             <i class="fas fa-city fa-2x text-primary mb-2"></i>
-                            <h6>Mumbai → Delhi</h6>
-                            <small class="text-muted">Starting from ₹1,645</small>
+                            <h6>Delhi Hotels</h6>
+                            <small class="text-muted">5 hotels available</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 border rounded text-center">
-                            <i class="fas fa-mountain fa-2x text-success mb-2"></i>
-                            <h6>Delhi → Srinagar</h6>
-                            <small class="text-muted">Starting from ₹3,565</small>
+                            <i class="fas fa-building fa-2x text-success mb-2"></i>
+                            <h6>Mumbai Hotels</h6>
+                            <small class="text-muted">5 hotels available</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 border rounded text-center">
                             <i class="fas fa-umbrella-beach fa-2x text-warning mb-2"></i>
-                            <h6>Mumbai → Goa</h6>
-                            <small class="text-muted">Starting from ₹2,541</small>
+                            <h6>Goa Hotels</h6>
+                            <small class="text-muted">2 hotels available</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="p-3 border rounded text-center">
-                            <i class="fas fa-globe fa-2x text-info mb-2"></i>
-                            <h6>Delhi → London</h6>
-                            <small class="text-muted">Starting from ₹23,569</small>
+                            <i class="fas fa-mountain fa-2x text-info mb-2"></i>
+                            <h6>Srinagar Hotels</h6>
+                            <small class="text-muted">3 hotels available</small>
                         </div>
                     </div>
                 </div>
@@ -375,8 +375,8 @@
             });
         });
 
-        function toggleDetails(flightNum) {
-            const details = document.getElementById('details-' + flightNum);
+        function toggleHotelDetails(hotelId) {
+            const details = document.getElementById('hotel-details-' + hotelId);
             if (details.style.display === 'none') {
                 details.style.display = 'block';
             } else {
